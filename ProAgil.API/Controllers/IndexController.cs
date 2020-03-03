@@ -12,7 +12,7 @@ using ProAgil.API.Model;
 namespace ProAgil.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/api")]
     public class IndexController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -22,12 +22,6 @@ namespace ProAgil.API.Controllers
 
         private readonly ILogger<Index> _logger;
         public DataContext Context;
-
-        // public Index(ILogger<Index> logger)
-        // {
-        //     _logger = logger;
-        // }
-
         
         public IndexController(DataContext context)
         {
@@ -35,11 +29,11 @@ namespace ProAgil.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
-                var results = Context.Eventos.ToList();
+                var results = await Context.Eventos.ToListAsync();
                 return Ok(results);
             }
             catch (Exception)
@@ -49,9 +43,17 @@ namespace ProAgil.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public Evento Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return Context.Eventos.FirstOrDefault(x => x.EventoId == id);
+            try
+            {
+                var results = await Context.Eventos.FirstOrDefaultAsync(x => x.EventoId == id);
+                return Ok(results);
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Banco de dados falhou :(");
+            }
         }
     }
 }
