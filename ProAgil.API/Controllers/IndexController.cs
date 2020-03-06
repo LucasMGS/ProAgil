@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ProAgil.API.Data;
-using ProAgil.API.Model;
+using ProAgil.Repository;
 
 namespace ProAgil.API.Controllers
 {
@@ -15,15 +14,9 @@ namespace ProAgil.API.Controllers
     [Route("/api")]
     public class IndexController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        private readonly ILogger<Index> _logger;
-        public DataContext Context;
+        public ProAgilContext Context;
         
-        public IndexController(DataContext context)
+        public IndexController(ProAgilContext context)
         {
             Context = context;
         }
@@ -47,7 +40,7 @@ namespace ProAgil.API.Controllers
         {
             try
             {
-                var results = await Context.Eventos.FirstOrDefaultAsync(x => x.EventoId == id);
+                var results = await Context.Eventos.FirstOrDefaultAsync(x => x.Id == id);
                 return Ok(results);
             }
             catch (Exception)
