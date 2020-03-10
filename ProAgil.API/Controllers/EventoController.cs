@@ -72,8 +72,9 @@ namespace ProAgil.API.Controllers
                 
                 if (await _repo.SaveChangesAsync())
                 {
-                    return Created($"/api/controller/{evento.Id}", evento);
+                    return Created($"/api/evento/{evento.Id}", evento);
                 }
+                
             }
             catch (Exception)
             {
@@ -83,23 +84,23 @@ namespace ProAgil.API.Controllers
             return BadRequest();
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Put(int eventoId,Evento model) 
+        [HttpPut("{eventoId}")]
+        public async Task<IActionResult> Put(Evento evento) 
         {
             try
             {
-                var evento = _repo.GetEventoAsyncById(eventoId,false);
+                //var evento = await _repo.GetEventoAsyncById(eventoId,false);
 
                 if (evento == null)
                 {
                     return NotFound();
                 }
 
-                _repo.Update(model);
+                _repo.Update(evento);
                 
                 if (await _repo.SaveChangesAsync())
                 {
-                    return Created($"/api/controller/{model.Id}", model);
+                    return Created($"/api/evento/{evento.Id}", evento);
                 }
             }
             catch (Exception)
@@ -110,12 +111,12 @@ namespace ProAgil.API.Controllers
             return BadRequest();
         }
 
-        [HttpDelete]
+        [HttpDelete("{eventoId}")]
         public async Task<IActionResult> Delete(int eventoId) 
         {
             try
             {
-                var evento = _repo.GetEventoAsyncById(eventoId,false);
+                var evento = await _repo.GetEventoAsyncById(eventoId,false);
 
                 if (evento == null)
                 {
