@@ -4,6 +4,7 @@ import { Evento } from 'src/app/models/Evento';
 import { BsModalService, BsModalRef, defineLocale, ptBrLocale, BsLocaleService, BsDatepickerConfig } from 'ngx-bootstrap';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { templateJitUrl } from '@angular/compiler';
+import { ToastrService } from 'ngx-toastr';
 defineLocale('pt-br', ptBrLocale);
 
 @Component({
@@ -25,12 +26,14 @@ export class EventosComponent implements OnInit {
   _filtroLista: string;
   registerForm: FormGroup;
   bodyDeletarEvento = '';
+  data = '';
   
   // Construtor
   constructor(private serviceEvento: EventoService, 
   private modalService: BsModalService,
   private formBuilder: FormBuilder,
-  private localeService: BsLocaleService) 
+  private localeService: BsLocaleService,
+  private toastr: ToastrService) 
   {
     localeService.use('pt-br');
   }
@@ -65,7 +68,7 @@ export class EventosComponent implements OnInit {
       },
       error => 
       {
-        console.log(error);
+        this.toastr.error(error,'Erro ao tentar carregar eventos');
       });
     }
     
@@ -132,10 +135,11 @@ export class EventosComponent implements OnInit {
           {
             template.hide();
             this.getEventos();
+            this.toastr.success('Evento criado com sucesso!')
           },
           error => 
           {
-            console.log(error);
+            this.toastr.error(error, 'Erro ao tentar criar evento!')
           }
         );      
     }
@@ -149,10 +153,11 @@ export class EventosComponent implements OnInit {
         {
           template.hide();
           this.getEventos();
+          this.toastr.success('Evento editado com sucesso!')
         },
         error =>
         {
-          console.log(error);
+          this.toastr.error(error, 'Erro ao tentar editar!')
         }
       );
     }
@@ -165,7 +170,7 @@ export class EventosComponent implements OnInit {
     excluirEvento(evento: Evento, template: any) {
       this.openModal(template);
       this.evento = evento;
-      this.bodyDeletarEvento = `Tem certeza que deseja excluir o Evento: ${evento.tema}, Código: ${evento.tema}`;
+      this.bodyDeletarEvento = `Tem certeza que deseja excluir o Evento: ${evento.tema}, Código: ${evento.id}`;
     }
     
     confirmeDelete(template: any) {
@@ -173,8 +178,9 @@ export class EventosComponent implements OnInit {
         () => {
             template.hide();
             this.getEventos();
+            this.toastr.success('Deletado com sucesso!');
           }, error => {
-            console.log(error);
+            this.toastr.error(error, 'Erro ao tentar deletar!');
           }
       );
     }
