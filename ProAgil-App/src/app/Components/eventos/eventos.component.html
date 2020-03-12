@@ -41,27 +41,20 @@
 <tbody>
   <tr *ngFor="let evento of eventosFiltrados" class="text-center">
     <td>
-      <img *ngIf="mostrarImagem" src="http://localhost:5000/img/{{evento.imagemURL}}"
+      <img *ngIf="mostrarImagem" src="http://localhost:5000/Resources/Images/{{evento.imagemURL}}?_ts{{dataAtual}}"
       [style.width.px] = "imagemLargura"
       [style.margin.px] = "imagemMargem">         
     </td>
     <td>{{evento.id}}</td>
     <td>{{evento.tema}}</td>
     <td>{{evento.local}}</td>
-    <td>
-      <div *ngIf="evento.data != null">
-        {{evento.data | DateTimeFormatPipe}}
-      </div>
-      <div *ngIf="evento.data == null">
-        <label>Ainda não definido</label>
-      </div>
-    </td>
+    <td>{{evento.data}}</td>
     <td>{{evento.qntdPessoas}}</td>
     <td>
-      <div *ngIf="!evento.lotes.length">
+      <div *ngIf="!evento?.lotes">
         <label>Não há</label>
       </div>
-      <div *ngIf="evento.lotes.length">
+      <div *ngIf="evento?.lotes?.length > 0">
         {{evento.lotes[evento.lotes.length-1].nome | uppercase }}
       </div>
     </td>
@@ -152,7 +145,6 @@ role="dialog" aria-labelledby="dialog-sizes-name1">
     [ngClass]="{'is-invalid': registerFormGet('data').errors && 
     registerFormGet('data').touched}"
     placeholder="Insira uma data e hora"
-    value="{{data | DateTimeFormatPipe}}"
     [(ngModel)]="data"
     [bsConfig]="{ dateInputFormat: 'DD/MM/YYYY hh:mm a' }"
     bsDatepicker>
@@ -184,12 +176,24 @@ role="dialog" aria-labelledby="dialog-sizes-name1">
 
 <div class="form-group col-md-9">
   <label>Imagem</label>
-  <input type="text" 
-  class="form-control" 
-  formControlName="imagemURL"
-  [ngClass]="{'is-invalid': registerFormGet('imagemURL').errors && 
-  registerFormGet('imagemURL').touched}" 
-  placeholder="Insira uma imagem">
+  <table>
+    <tr>
+      <td>
+        <button class="btn btn-success" (click) = "file.click()">
+          Enviar Imagem
+        </button>
+        <input type="file" #file
+        class="form-control" 
+        formControlName="imagemURL"
+        [ngClass]="{'is-invalid': registerFormGet('imagemURL').errors && 
+        registerFormGet('imagemURL').touched}" 
+        placeholder="Insira uma imagem"
+        (change) = "onFileChange($event)"
+        style="display: none;">
+      </td>
+    </tr>
+  </table>
+  
 <div *ngIf="registerFormGet('imagemURL').hasError('required') && 
   registerFormGet('imagemURL').touched" class="invalid-feedback">
   Imagem é obrigatório!
@@ -205,7 +209,7 @@ role="dialog" aria-labelledby="dialog-sizes-name1">
     formControlName="telefone"
     [ngClass]="{'is-invalid': registerFormGet('telefone').errors && 
     registerFormGet('telefone').touched}"
-    placeholder="Insira o telefone">
+    placeholder="Insira um telefone">
     <div *ngIf="registerFormGet('telefone').hasError('required') && 
       registerFormGet('telefone').touched" class="invalid-feedback">
       Telefone é obrigatório!
@@ -219,7 +223,7 @@ role="dialog" aria-labelledby="dialog-sizes-name1">
   formControlName="email"
   [ngClass]="{'is-invalid': registerFormGet('email').errors && 
   registerFormGet('email').touched}"
-  placeholder="Insira um tema">
+  placeholder="Insira um e-mail">
 
 <div *ngIf="registerFormGet('email').hasError('required') && 
   registerFormGet('email').touched" class="invalid-feedback">
@@ -264,10 +268,10 @@ role="dialog" aria-labelledby="dialog-sizes-name1">
     		</div>    
     		<div class="modal-footer btn-group d-flex">      
       			<button type="button" class="btn btn-outline-primary" (click)="confirmDelete.hide()">
-        			CENCELAR
+        			Cancelar
       			</button>
       			<button type="button" class="btn btn-outline-danger" (click)="confirmeDelete(confirmDelete)">
-          			DELETAR
+          		Deletar
         		</button>
     		</div>
   		</div>

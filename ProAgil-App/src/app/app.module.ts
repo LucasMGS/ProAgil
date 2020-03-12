@@ -23,6 +23,7 @@ import { DashboardComponent } from './Components/dashboard/dashboard.component';
 // PIPE IMPORTS
 import { DateTimeFormatPipe } from './helpers/DateTimeFormat.pipe';
 import { TituloComponent } from './Components/_shared/titulo/titulo.component';
+import { DatePipe } from '@angular/common';
 
 @NgModule({
    declarations: [
@@ -53,7 +54,8 @@ import { TituloComponent } from './Components/_shared/titulo/titulo.component';
        })
    ],
    providers: [
-      EventoService
+      EventoService,
+      DatePipe
    ],
    bootstrap: [
       AppComponent

@@ -5,6 +5,7 @@ import { BsModalService, BsModalRef, defineLocale, ptBrLocale, BsLocaleService, 
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { templateJitUrl } from '@angular/compiler';
 import { ToastrService } from 'ngx-toastr';
+import { DatePipe } from '@angular/common';
 defineLocale('pt-br', ptBrLocale);
 
 @Component({
@@ -17,23 +18,27 @@ export class EventosComponent implements OnInit {
   //PROPS
   eventos: Evento[];
   evento: Evento;
-  imagemLargura = 85;
+  imagemLargura = 60;
   imagemMargem = 2;
   mostrarImagem = false;
   eventosFiltrados: Evento[];
   modalRef: BsModalRef;
-  // tslint:disable-next-line: variable-name
   _filtroLista: string;
   registerForm: FormGroup;
   bodyDeletarEvento = '';
+  file: File;
   data = '';
+  modoEvento = '';
+  fileNameUpdate: string;
+  dataAtual: string;
   
   // Construtor
   constructor(private serviceEvento: EventoService, 
   private modalService: BsModalService,
   private formBuilder: FormBuilder,
   private localeService: BsLocaleService,
-  private toastr: ToastrService) 
+  private toastr: ToastrService,
+  public datepipe: DatePipe) 
   {
     localeService.use('pt-br');
   }
@@ -89,8 +94,15 @@ export class EventosComponent implements OnInit {
     this.registerForm.reset();
     if (evento) 
     {
-      this.evento = evento;
-      this.registerForm.patchValue(evento);
+      this.modoEvento = 'put';
+      this.evento = Object.assign({}, evento);
+      this.fileNameUpdate = evento.imagemURL.toString();
+      this.evento.imagemURL = '';
+      this.registerForm.patchValue(this.evento);
+    }
+    else
+    {
+      this.modoEvento = 'post';
     }
     template.show();
   }
@@ -114,23 +126,51 @@ export class EventosComponent implements OnInit {
     {
       if (this.registerForm.valid) 
       {
-        if(!this.evento)
+        if(this.modoEvento === 'post')
         {
           this.criarEvento(template);
         }      
-        else 
+        else if (this.modoEvento === 'put')
         {
           this.editarEvento(template);      
         }
       }  
     }
 
+    uploadImage()
+    {
+      if (this.modoEvento === 'post') 
+      {
+        const nomeDoArquivo = this.evento.imagemURL.split('\\', 3);
+        this.evento.imagemURL = nomeDoArquivo[2];
+        
+        this.serviceEvento.postUpload(this.file, nomeDoArquivo[2]).subscribe(
+          () => {
+            this.dataAtual = new Date().getMilliseconds().toString();
+            this.getEventos();
+          }
+        );
+      }
+      else if(this.modoEvento === 'put')
+      {
+        this.evento.imagemURL = this.fileNameUpdate;
+        this.serviceEvento.postUpload(this.file, this.fileNameUpdate).subscribe(
+          () => {
+            this.dataAtual = new Date().getMilliseconds().toString();
+            this.getEventos();
+          }
+        );
+      }
+    }
+
     criarEvento(template: any)
     {
-      
+         
         this.evento = Object.assign({}, this.registerForm.value);
-        this.serviceEvento.postEvento(this.evento).subscribe
-        (
+
+        this.uploadImage();
+
+        this.serviceEvento.postEvento(this.evento).subscribe(
           () =>
           {
             template.hide();
@@ -140,13 +180,16 @@ export class EventosComponent implements OnInit {
           error => 
           {
             this.toastr.error(error, 'Erro ao tentar criar evento!')
-          }
-        );      
+          });      
     }
 
     editarEvento(template: any)
     {
+      //this.modoEvento = 'put';
       this.evento = Object.assign({id: this.evento.id}, this.registerForm.value);
+
+      this.uploadImage();
+
       this.serviceEvento.putEvento(this.evento).subscribe
       (
         () =>
@@ -167,22 +210,35 @@ export class EventosComponent implements OnInit {
         return this.registerForm.get(formControlName);
     }
 
-    excluirEvento(evento: Evento, template: any) {
+    excluirEvento(evento: Evento, template: any)
+    {
       this.openModal(template);
       this.evento = evento;
       this.bodyDeletarEvento = `Tem certeza que deseja excluir o Evento: ${evento.tema}, Código: ${evento.id}`;
     }
     
-    confirmeDelete(template: any) {
+    confirmeDelete(template: any) 
+    {
       this.serviceEvento.deleteEvento(this.evento.id).subscribe(
         () => {
             template.hide();
             this.getEventos();
             this.toastr.success('Deletado com sucesso!');
-          }, error => {
+          }, 
+          error => 
+          {
             this.toastr.error(error, 'Erro ao tentar deletar!');
           }
       );
+    }
+
+    onFileChange(event)
+    {
+      if (event.target.files && event.target.files.length) 
+      {
+        this.file = event.target.files;
+        console.log(this.file);  
+      }
     }
   }
       
